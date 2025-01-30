@@ -3,8 +3,8 @@ import { ref, computed, onMounted } from "vue";
 
 const tasks = ref([]);
 const newTask = ref("");
-const editingTaskIndex = tasks;
-// const editTask = '';
+const editingTaskIndex = ref(null); // نستخدم ref علشان نخزن index المهمة اللي بنعدلها
+const editTask = ref(""); // نستخدم ref علشان نخزن النص الجديد للمهمة
 
 onMounted(() => {
     const loadTasks = () => {
@@ -38,16 +38,17 @@ const addTask = () => {
     }
 }
 
-const startEditingTask = (index, text) => {
-    this.editingTaskIndex = index; // تحديد الفهرس اللي بيتعدل
-    this.editTask = text;
+const startEditingTask = (index) => {
+    editingTaskIndex.value = index; // نخزن index المهمة اللي بنعدلها
+    editTask.value = tasks.value[index].text; // نخزن النص الحالي للمهمة
 }
 
 const saveTask = (index) => {
-    if (this.editTask.trim() !== '') {
-        this.tasks[index].text = this.editTask; // حفظ التعديل
-        this.editingTaskIndex = null; // إنهاء التعديل
-        this.editTask = '';
+    if (editTask.value.trim() !== '') { // نتأكد أن النص الجديد مش فارغ
+        tasks.value[index].text = editTask.value; // نعدل النص
+        editingTaskIndex.value = null; // نرجع القيمة لـ null علشان نخفي حقل التعديل
+        editTask.value = ''; // نمسح النص من حقل التعديل
+        saveTasks(); // نحفظ التعديلات في localStorage
     }
 }
 
@@ -133,7 +134,24 @@ const editTask = (task) => {
                             <i @click="startEditingTask(index, task.text)"
                                 class="pi pi-file-edit w-5 h-7 text-2xl text-blue-700"></i>
 
-                            <i @click="removeTask" class="pi pi-trash w-5 h-7  text-2xl text-red-700 "></i>
+                            <i @click="removeTask(index)" class="pi pi-trash w-5 h-7  text-2xl text-red-700 "></i>
+                        </div>
+                    </div>
+
+                    <div v-if="editingTaskIndex === index"
+                        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                        <div v-if="editingTaskIndex === index"
+                            class="task-module bg-white opacity-1 flex justify-self-center self-center justify-center align-center flex-col pt-10 position-center gap-2 absolute rounded-lg shadow-lg p-6 h-60 w-11/12 max-w-md">
+                            <h1 class=" mb-4 text-3xl">Edit Task</h1>
+                            <label class="flex align-center justify-start space-y-3" for="Edit task">
+                                Task Name
+                            </label>
+                            <input type="text" id="Edit_task" v-model="editTask" @keyup.enter="saveTask(index)"
+                                placeholder="Edit task" class="w-full p-2 rounded-lg border border-gray-400" />
+                            <button @click="saveTask(index)"
+                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                Save
+                            </button>
                         </div>
                     </div>
                 </div>
