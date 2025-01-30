@@ -3,9 +3,8 @@ import { ref, computed, onMounted } from "vue";
 
 const tasks = ref([]);
 const newTask = ref("");
-const editingTaskIndex = ref(null); // نستخدم ref علشان نخزن index المهمة اللي بنعدلها
-const editTask = ref(""); // نستخدم ref علشان نخزن النص الجديد للمهمة
-
+const editingTaskIndex = ref(null);
+const editTask = ref("");
 onMounted(() => {
     const loadTasks = () => {
         const savedTasks = localStorage.getItem("tasks");
@@ -22,8 +21,6 @@ onMounted(() => {
 
 const totalTasks = computed(() => tasks.value.length);
 
-// const doneTasksCount = computed(() => tasks.value.filter((task) => task.completed).length);
-
 const doneTasksCount = computed(() => {
     return Array.isArray(tasks.value)
         ? tasks.value.filter((task) => task.done).length
@@ -39,16 +36,16 @@ const addTask = () => {
 }
 
 const startEditingTask = (index) => {
-    editingTaskIndex.value = index; // نخزن index المهمة اللي بنعدلها
-    editTask.value = tasks.value[index].text; // نخزن النص الحالي للمهمة
+    editingTaskIndex.value = index;
+    editTask.value = tasks.value[index].text;
 }
 
 const saveTask = (index) => {
-    if (editTask.value.trim() !== '') { // نتأكد أن النص الجديد مش فارغ
-        tasks.value[index].text = editTask.value; // نعدل النص
-        editingTaskIndex.value = null; // نرجع القيمة لـ null علشان نخفي حقل التعديل
-        editTask.value = ''; // نمسح النص من حقل التعديل
-        saveTasks(); // نحفظ التعديلات في localStorage
+    if (editTask.value.trim() !== '') {
+        tasks.value[index].text = editTask.value;
+        editingTaskIndex.value = null;
+        editTask.value = '';
+        saveTasks();
     }
 }
 
@@ -62,37 +59,19 @@ const deleteTasksDone = () => {
     saveTasks();
 };
 
-const removeTasks = (index) => {
-    tasks.value.splice(index);
+const removeTasks = () => {
+    tasks.value = [];
     saveTasks();
 }
 
 const saveTasks = () => {
     localStorage.setItem("tasks", JSON.stringify(tasks.value));
 }
-
-const editTask = (task) => {
-    tasks.value[tasks.value.findIndex((task) => task.text === newTask.value)].text =
-        newTask.value;
-    saveTasks();
-}
 </script>
 
 <template>
     <section class="container">
         <h1 class="title">Vue ToDo List</h1>
-        <div v-if="editingTaskIndex === index" class="bg-white opacity-5
-            flex flex-col pt-20 absolute rounded-lg shadow-lg p-6 h-60 w-11/12 max-w-md">
-            <label class="flex align-center justify-start space-y-3" for="Edit task">
-                Edit task
-            </label>
-            <input type="text" id="Edit_task" v-model="editTask" placeholder="Edit task"
-                class="w-full p-2 rounded-lg border border-gray-400" />
-            <button @click="saveTask(index)"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Save
-            </button>
-        </div>
 
         <div class="wrapper">
             <!-- buttons -->
@@ -131,7 +110,7 @@ const editTask = (task) => {
                             <span :class="{ 'line-through': task.done }">{{ task.text }}</span>
                         </div>
                         <div class="flex gap-4">
-                            <i @click="startEditingTask(index, task.text)"
+                            <i @click="startEditingTask(index)"
                                 class="pi pi-file-edit w-5 h-7 text-2xl text-blue-700"></i>
 
                             <i @click="removeTask(index)" class="pi pi-trash w-5 h-7  text-2xl text-red-700 "></i>
@@ -156,6 +135,8 @@ const editTask = (task) => {
                     </div>
                 </div>
             </div>
+
+
 
             <!-- task input -->
             <div class="task-input">
@@ -280,6 +261,11 @@ body {
 .line-through {
     text-decoration: line-through;
     color: #9ca3af;
+}
+
+.task-module {
+    justify-self: anchor-center;
+    align-self: anchor-center;
 }
 
 
